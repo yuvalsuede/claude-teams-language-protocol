@@ -103,24 +103,35 @@ for (const [type, data] of Object.entries(typeGroups)) {
 
 console.log();
 
-// Cost estimation (assuming Claude Sonnet pricing as of 2026)
-const inputPricePer1M = 3.0; // $/1M input tokens (approximate)
-const asCost = (totalAgentSpeak / 1_000_000 * inputPricePer1M).toFixed(4);
-const vbCost = (totalVerbose / 1_000_000 * inputPricePer1M).toFixed(4);
+// Cost estimation — Claude Opus 4.6 pricing (Feb 2026)
+// Each agent message is OUTPUT for the sender + INPUT for the receiver
+const inputPricePer1M = 5.0;   // $/1M input tokens
+const outputPricePer1M = 25.0; // $/1M output tokens
 
-console.log('═══ COST ESTIMATE (per session, input tokens only) ═══════════════════');
-console.log();
-console.log(`  AgentSpeak:    $${asCount(totalAgentSpeak)} (${totalAgentSpeak} tokens @ $3/1M)`);
-console.log(`  Verbose:       $${asCount(totalVerbose)} (${totalVerbose} tokens @ $3/1M)`);
-console.log(`  Savings:       $${asCount(totalVerbose - totalAgentSpeak)} per session`);
-console.log();
-console.log(`  At 10 sessions/day:  $${(((totalVerbose - totalAgentSpeak) * 10) / 1_000_000 * inputPricePer1M).toFixed(2)}/day saved`);
-console.log(`  At 200 sessions/mo:  $${(((totalVerbose - totalAgentSpeak) * 200) / 1_000_000 * inputPricePer1M).toFixed(2)}/mo saved`);
-console.log();
+const saved = totalVerbose - totalAgentSpeak;
 
-function asCount(tokens) {
-  return (tokens / 1_000_000 * inputPricePer1M).toFixed(4);
+function costStr(tokens, pricePerM) {
+  return (tokens / 1_000_000 * pricePerM).toFixed(4);
 }
+
+console.log('═══ COST ESTIMATE (Claude Opus 4.6 pricing) ══════════════════════════');
+console.log();
+console.log('  Each message = output (sender) + input (receiver)');
+console.log();
+console.log(`  As INPUT  ($5/MTok):   $${costStr(saved, inputPricePer1M)} saved/session`);
+console.log(`  As OUTPUT ($25/MTok):  $${costStr(saved, outputPricePer1M)} saved/session`);
+console.log(`  Combined:              $${costStr(saved, inputPricePer1M + outputPricePer1M)} saved/session`);
+console.log();
+console.log(`  At 100 sessions/day:`);
+console.log(`    Input savings:   $${((saved * 100) / 1_000_000 * inputPricePer1M).toFixed(2)}/day`);
+console.log(`    Output savings:  $${((saved * 100) / 1_000_000 * outputPricePer1M).toFixed(2)}/day`);
+console.log(`    Combined:        $${((saved * 100) / 1_000_000 * (inputPricePer1M + outputPricePer1M)).toFixed(2)}/day`);
+console.log();
+console.log(`  At 3,000 sessions/mo:`);
+console.log(`    Input savings:   $${((saved * 3000) / 1_000_000 * inputPricePer1M).toFixed(2)}/mo`);
+console.log(`    Output savings:  $${((saved * 3000) / 1_000_000 * outputPricePer1M).toFixed(2)}/mo`);
+console.log(`    Combined:        $${((saved * 3000) / 1_000_000 * (inputPricePer1M + outputPricePer1M)).toFixed(2)}/mo`);
+console.log();
 
 // Per-agent breakdown
 const agentGroups = {};

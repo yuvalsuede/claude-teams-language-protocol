@@ -129,13 +129,15 @@ Measured on 10 real inter-agent messages from a 4-agent sprint (coder, QA, bugfi
 | QA | 64.1% | 2.8x | Bug reports with line numbers |
 | Bugfix | 49.3% | 2.0x | Detailed progress is harder to compress |
 
-### Cost Impact
+### Cost Impact (Claude Opus 4.6 Pricing)
 
-| Scale | Tokens Saved | Cost Saved (@ $3/1M input) |
-|-------|-------------|---------------------------|
-| Per session | 2,729 | $0.008 |
-| 100 sessions/day | 272,900 | **$0.82/day** |
-| 3,000 sessions/mo | 8,187,000 | **$24.56/mo** |
+Each agent message is **output** for the sender ($25/MTok) and **input** for the receiver ($5/MTok).
+
+| Scale | Tokens Saved | Input Saved ($5/MTok) | Output Saved ($25/MTok) | Combined |
+|-------|-------------|----------------------|------------------------|----------|
+| Per session | 2,729 | $0.014 | $0.068 | **$0.082** |
+| 100 sessions/day | 272,900 | $1.36/day | $6.82/day | **$8.19/day** |
+| 3,000 sessions/mo | 8,187,000 | $40.94/mo | $204.68/mo | **$245.61/mo** |
 
 > Run it yourself: `node benchmarks/run-benchmark.mjs` (requires `npm install`)
 
