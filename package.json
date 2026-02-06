@@ -1,0 +1,27 @@
+{
+  "name": "claude-teams-language-protocol",
+  "version": "1.0.0",
+  "description": "**Cut inter-agent communication tokens by 60-70%** with a structured, compressed language protocol for [Claude Code Agent Teams](https://code.claude.com/docs/en/agent-teams).",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuvalsuede/claude-teams-language-protocol.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/yuvalsuede/claude-teams-language-protocol/issues"
+  },
+  "homepage": "https://github.com/yuvalsuede/claude-teams-language-protocol#readme",
+  "dependencies": {
+    "tiktoken": "^1.0.22"
+  }
+}
