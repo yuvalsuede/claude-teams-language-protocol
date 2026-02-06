@@ -96,17 +96,48 @@ epsilonP0 content.routes !auth bypass L140
 3. **File shortcodes** - Project-specific abbreviations eliminate long paths
 4. **No pleasantries** - Agents don't need "Hi team!" or "Great work!" - just signal and data
 
-## Results from Real Usage
+## Benchmark Results (Real Data)
 
-In a 4-agent sprint (coder, QA, bugfix, UI expert) working on a Next.js + Fastify project:
+Measured on 10 real inter-agent messages from a 4-agent sprint (coder, QA, bugfix, UI expert) on a Next.js + Fastify project. Token counts via `tiktoken` (`cl100k_base`).
 
-| Metric | Without Protocol | With AgentSpeak |
-|--------|-----------------|-----------------|
-| Avg message tokens | ~40 | ~15 |
-| Messages per session | ~50 | ~50 |
-| Total comms tokens | ~2,000 | ~750 |
-| Token savings | - | **62%** |
-| Misunderstandings | Several | Zero |
+```
+┌────┬──────────────────────────┬───────────┬───────────┬──────────┬──────────┐
+│ #  │ Message Type             │ AgentSpk  │ Verbose   │ Savings  │ Ratio    │
+├────┼──────────────────────────┼───────────┼───────────┼──────────┼──────────┤
+│  1 │ status_start             │      29   │      82   │   64.6%  │    2.8x  │
+│  2 │ progress_report          │     325   │     557   │   41.7%  │    1.7x  │
+│  3 │ qa_report                │     360   │     986   │   63.5%  │    2.7x  │
+│  4 │ lead_routing             │     196   │     503   │   61.0%  │    2.6x  │
+│  5 │ task_complete            │     232   │     516   │   55.0%  │    2.2x  │
+│  6 │ task_complete_coder      │      59   │     325   │   81.8%  │    5.5x  │
+│  7 │ task_complete_ui         │     242   │     784   │   69.1%  │    3.2x  │
+│  8 │ lead_routing_coder       │      84   │     393   │   78.6%  │    4.7x  │
+│  9 │ shutdown_ack             │      19   │      69   │   72.5%  │    3.6x  │
+│ 10 │ cross_agent_coord        │      40   │     100   │   60.0%  │    2.5x  │
+├────┼──────────────────────────┼───────────┼───────────┼──────────┼──────────┤
+│ ΣΣ │ TOTAL                    │    1586   │    4315   │   63.2%  │    2.7x  │
+└────┴──────────────────────────┴───────────┴───────────┴──────────┴──────────┘
+```
+
+### By Agent Role
+
+| Agent | Savings | Ratio | Notes |
+|-------|---------|-------|-------|
+| Coder | **81.8%** | 5.5x | Code status updates compress best |
+| Lead | 68.8% | 3.2x | Routing/assignment messages are formulaic |
+| UI Expert | 68.1% | 3.2x | Component-level updates |
+| QA | 64.1% | 2.8x | Bug reports with line numbers |
+| Bugfix | 49.3% | 2.0x | Detailed progress is harder to compress |
+
+### Cost Impact
+
+| Scale | Tokens Saved | Cost Saved (@ $3/1M input) |
+|-------|-------------|---------------------------|
+| Per session | 2,729 | $0.008 |
+| 100 sessions/day | 272,900 | **$0.82/day** |
+| 3,000 sessions/mo | 8,187,000 | **$24.56/mo** |
+
+> Run it yourself: `node benchmarks/run-benchmark.mjs` (requires `npm install`)
 
 ## Contributing
 
