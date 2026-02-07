@@ -25,6 +25,23 @@ omega   = Shutting down
 theta   = Protocol improvement proposal
 ```
 
+### Status Modifiers
+
+Status codes can carry modifiers to express nuance without extra messages:
+
+```
+delta:partial = Partially done (some items completed, others deferred)
+```
+
+Use `delta:partial` when a task has mixed-severity items and only some are resolved:
+
+```
+delta:partialT3 P0+P1 fixed, P2 deferred to T8.   # partial completion with deferral
+delta:partialT3 auth fixed, perf deferred >>T5.     # unblocks dependents for completed portion
+```
+
+The agent MUST specify what was completed and what was deferred. The lead can then create follow-up tasks for deferred items.
+
 ## Actions
 
 ```
@@ -182,6 +199,16 @@ deltaT3 BUGFIX all QA bugs fixed:
 - P1 CF -insecure .default() L26
 - P2 admin.service -unused redis import L2
 tsc clean. 11 files changed.
+```
+
+For partial completions, use `delta:partial` to signal what was done and what remains:
+
+```
+delta:partialT3 BUGFIX P0+P1 fixed, P2 deferred:
+- P0 content.routes +adminOnly L140-166
+- P0 engagement.routes +ownership check L9-19
+- P1 CF -insecure .default() L26
+DEFERRED P2: [admin.svc L2, feed.mon L315, AC L85] ->T8
 ```
 
 ### Error Recovery
