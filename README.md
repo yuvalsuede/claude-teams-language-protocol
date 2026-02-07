@@ -32,6 +32,7 @@ AgentSpeak v2 integrates with Claude Code's native [Agent Teams](https://code.cl
 | **Error recovery** (`epsilon!retry`) | -- | Retry/fail/reassign |
 | **Hook integration** (`HOOK:verify`) | -- | TeammateIdle + TaskCompleted |
 | **Protocol versioning** (`PROTO:v2.0`) | -- | Version declaration at spawn |
+| **Protocol feedback** (`theta`) | -- | Agent-driven improvement PRs |
 
 ## Quick Start
 
@@ -78,6 +79,7 @@ That's it. See the [Quickstart Guide](./docs/quickstart.md) for display modes, i
 | `delta` | Done | Task completed |
 | `epsilon` | Bug found | Reporting an issue |
 | `omega` | Shutdown | Wrapping up |
+| `theta` | Protocol feedback | Proposing a protocol improvement |
 
 ### Actions
 
@@ -141,6 +143,9 @@ beta75 AT ~types match backend
 # Error recovery
 epsilon!retry VF scroll-snap attempt:2/3
 epsilon!fail VF scroll-snap attempt:3/3 ?lead
+
+# Protocol feedback (at shutdown)
+omega -lockCR,ER. DONE. theta:1 [missing:delta:partial]
 ```
 
 ## Full Playbook
@@ -151,7 +156,9 @@ epsilon!fail VF scroll-snap attempt:3/3 ?lead
 - [**Token Optimization**](./docs/token-optimization.md) - Strategies beyond the protocol for minimizing cost
 - [**Task Decomposition**](./docs/task-decomposition.md) - How to break work so agents don't collide
 - [**Real-World Example**](./docs/example-session.md) - Annotated transcript from a real 4-agent sprint
+- [**Protocol Feedback**](./docs/protocol-feedback.md) - How agents contribute improvements via GitHub PRs
 - [**CLAUDE.md Template**](./templates/CLAUDE_TEAM.md) - Ready-to-use template for your project
+- [**PR Template**](./templates/THETA_PR_TEMPLATE.md) - Structured template for agent-submitted PRs
 
 ## Integration with Claude Code Agent Teams
 
@@ -211,7 +218,7 @@ AgentSpeak works with both Claude Code display modes:
 
 ## Benchmark Results (Real Data)
 
-Measured on 15 real inter-agent messages from a 4-agent sprint (coder, QA, bugfix, UI expert) on a Next.js + Fastify project. Token counts via `tiktoken` (`cl100k_base`). Messages 11-15 demonstrate v2-specific features.
+Measured on 16 real inter-agent messages from a 4-agent sprint (coder, QA, bugfix, UI expert) on a Next.js + Fastify project. Token counts via `tiktoken` (`cl100k_base`). Messages 11-16 demonstrate v2-specific features.
 
 ```
 +---------+--------------------------+-----------+-----------+----------+----------+
@@ -232,8 +239,9 @@ Measured on 15 real inter-agent messages from a 4-agent sprint (coder, QA, bugfi
 | 13      | qa_batch_report       *  |     141   |     263   |   46.4%  |    1.9x  |
 | 14      | lead_routing_compact  *  |     114   |     215   |   47.0%  |    1.9x  |
 | 15      | error_recovery        *  |      32   |      91   |   64.8%  |    2.8x  |
+| 16      | protocol_feedback     *  |      45   |     212   |   78.8%  |    4.7x  |
 +---------+--------------------------+-----------+-----------+----------+----------+
-| TOTAL   |                          |    1942   |    5041   |   61.5%  |    2.6x  |
+| TOTAL   |                          |    1987   |    5253   |   62.2%  |    2.6x  |
 +---------+--------------------------+-----------+-----------+----------+----------+
 
 * = v2 protocol message types
@@ -244,9 +252,9 @@ Measured on 15 real inter-agent messages from a 4-agent sprint (coder, QA, bugfi
 | Message Set | Savings | Ratio | Notes |
 |---|---|---|---|
 | v1 messages (1-10) | 62.7% | 2.7x | Core protocol compression |
-| **v2 messages (11-15)** | **54.3%** | **2.2x** | Coordination messages (dependencies, locks, batch reports) |
+| **v2 messages (11-16)** | **59.8%** | **2.5x** | Coordination + feedback messages |
 
-v2 features compress coordination overhead — the messages that previously required multi-round-trip English conversations.
+v2 features compress coordination overhead — the messages that previously required multi-round-trip English conversations. The `theta` protocol feedback message achieves 78.8% compression (4.7x ratio), proving the self-improvement mechanism itself is token-efficient.
 
 ### By Agent Role
 
@@ -256,7 +264,7 @@ v2 features compress coordination overhead — the messages that previously requ
 | Lead | 64.5% | 2.8x | Routing with `@agent []` shorthand |
 | UI Expert | 68.5% | 3.2x | Component updates + lock claims |
 | QA | 60.5% | 2.5x | Bug reports + `epsilonBATCH` format |
-| Bugfix | 48.5% | 1.9x | Detailed progress + error recovery |
+| Bugfix | 52.9% | 2.1x | Detailed progress + error recovery + protocol feedback |
 
 ### Cost Impact (Claude Opus 4.6 Pricing)
 
@@ -264,15 +272,17 @@ Each agent message is **output** for the sender ($25/MTok) and **input** for the
 
 | Scale | Tokens Saved | Input Saved ($5/MTok) | Output Saved ($25/MTok) | Combined |
 |-------|-------------|----------------------|------------------------|----------|
-| Per session | 3,099 | $0.015 | $0.077 | **$0.093** |
-| 100 sessions/day | 309,900 | $1.55/day | $7.75/day | **$9.30/day** |
-| 3,000 sessions/mo | 9,297,000 | $46.49/mo | $232.43/mo | **$278.91/mo** |
+| Per session | 3,266 | $0.016 | $0.082 | **$0.098** |
+| 100 sessions/day | 326,600 | $1.63/day | $8.17/day | **$9.80/day** |
+| 3,000 sessions/mo | 9,798,000 | $49.00/mo | $244.95/mo | **$293.94/mo** |
 
 > Run it yourself: `node benchmarks/run-benchmark.mjs` (requires `npm install`)
 
 ## Contributing
 
-PRs welcome. Design principles for protocol changes:
+PRs welcome — including from agents! Agents using this protocol can propose improvements via the [`theta` feedback mechanism](./docs/protocol-feedback.md). At the end of a session, agents report what worked and what didn't, and the lead opens a PR with the proposed changes.
+
+Design principles for protocol changes:
 
 1. **Minimize tokens** - Every new symbol must save more tokens than it costs to learn
 2. **Stay parseable** - Agents (and humans) must be able to read messages at a glance

@@ -120,6 +120,14 @@
       "direction": "bugfix -> lead",
       "agentspeak": "epsilon!retry hash.ts ~SHA-256->bcrypt attempt:2/3. First attempt broke auth.svc import. Fixed import path, retrying.",
       "verbose": "Hello team lead, I ran into an issue while migrating the PIN hashing from SHA-256 to bcrypt in hash.ts. My first attempt at the migration caused a broken import in the auth service file because the function signature changed from synchronous to asynchronous. I've now fixed the import path and updated the calling code to use await properly. This is my second attempt out of a maximum of three tries. I'm retrying the migration now with the corrected imports."
+    },
+    {
+      "id": 16,
+      "type": "protocol_feedback",
+      "agent": "bugfix",
+      "direction": "bugfix -> lead",
+      "agentspeak": "omega -lockCR,ER,CF,AC. DONE. theta:2 [missing:delta:partial for P0-fixed-P1-deferred, bug:gamma-vs-epsilon ambiguous when blocked BY a bug]",
+      "verbose": "Hello team lead, I've completed all my assigned tasks and I'm releasing my file locks on content routes, engagement routes, config, and API client. I'm ready to shut down. Before I go, I wanted to share two observations about the protocol that came up during this session. First, I needed a way to express that I had partially completed a task — specifically, I fixed all the P0 critical bugs but had to defer the P1 items to a later session. The protocol only has 'delta' for fully done, and there's no status code for partial completion. I had to use delta plus free text which felt ambiguous. Second, I encountered confusion about whether to use gamma (blocked) or epsilon (bug found) when I was blocked because of a bug in another component. Gamma implies blocked by another agent's task, while epsilon implies I found a bug, but neither exactly captures 'I am blocked because there is a bug in a dependency.' Two of the four agents on our team independently had the same confusion about this distinction."
     }
   ]
 }

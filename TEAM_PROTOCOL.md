@@ -22,6 +22,7 @@ gamma   = Blocked / need help / waiting
 delta   = Done / completed
 epsilon = Bug found / error
 omega   = Shutting down
+theta   = Protocol improvement proposal
 ```
 
 ## Actions
@@ -209,6 +210,88 @@ omega @lead idle ?nextT                        # TeammateIdle — request next t
 omega @lead idle DONE                          # TeammateIdle — no more work
 ```
 
+### Protocol Feedback (theta)
+
+Agents that use this protocol can propose improvements based on real session experience.
+The lead collects feedback and opens a single PR per session to the protocol repo.
+
+#### Feedback Format
+
+```
+theta:[category] [description] [evidence?]
+```
+
+Categories:
+
+| Tag | Category | Example |
+|-----|----------|---------|
+| `theta:shortcode` | New shortcode/status code found useful | Needed `retry-count` shortcode |
+| `theta:compress` | Shorter way to express something | `>>T4-6` for consecutive range |
+| `theta:pattern` | New communication pattern discovered | Handoff pattern not in docs |
+| `theta:bug` | Protocol ambiguity or parsing conflict | Two agents parsed message differently |
+| `theta:missing` | Feature gap the protocol lacks | No way to signal partial completion |
+
+#### Examples
+
+```
+theta:compress >>T4-6 shorter than >>T4,T5,T6 for consecutive ranges. Used 3x this session.
+theta:missing need delta:partial for "P0 fixed, P1 deferred". Workaround cost 4 extra messages.
+theta:pattern handoff: agentA -lockVF @agentB "VF yours, snap done" — not documented.
+theta:bug gamma vs epsilon ambiguous when blocked BY a bug. 2 agents parsed differently.
+theta:shortcode needed TST=test-file shortcode 5x. Consider adding to defaults.
+```
+
+#### Collection Flow
+
+1. Agents note `theta` observations during the session (zero token cost while working)
+2. At `omega`, append theta items to shutdown message:
+   ```
+   omega -lockCR,ER. DONE. theta:2 [missing:delta:partial, compress:>>range]
+   ```
+3. Lead collects theta items from all teammates' omega messages
+4. Lead deduplicates and applies universality filter (drop project-specific items)
+5. If valid items remain, lead opens 1 PR via `gh pr create`
+
+#### PR Workflow
+
+```bash
+# Branch naming: theta/<date>-<category>-<slug>
+git checkout -b theta/2026-02-07-missing-partial-completion
+
+# Commit format
+git commit -m "theta: [category] [description]
+
+Evidence: [how discovered, frequency, token cost]
+Session: [team size, project type]
+
+Co-Authored-By: Claude Agent <noreply@anthropic.com>"
+
+# Open PR (uses fork if no push access)
+gh pr create --repo <protocol-repo> --title "theta: [description]"
+```
+
+See [Protocol Feedback Guide](./docs/protocol-feedback.md) for the full PR template and workflow.
+
+#### Rules
+
+1. Collect theta observations during session, report in `omega` message
+2. Lead deduplicates and filters (universal improvements only, not project-specific)
+3. Lead opens a **single PR per session** via `gh pr create`
+4. Branch naming: `theta/<date>-<category>-<slug>`
+5. PRs require **human review** — agents NEVER merge
+6. If no push access, fork first with `gh repo fork`; if no `gh`, report inline to user
+7. Maximum token budget: ~300-500 tokens for the entire feedback mechanism
+
+#### Inline Feedback (Blocking Issues Only)
+
+If an agent encounters a protocol bug that actively blocks communication, signal inline:
+
+```
+theta:bug gamma vs epsilon ambiguous — which for "blocked by a bug"?
+```
+
+Lead can defer: `theta->omega` (note now, PR at shutdown) or acknowledge: `theta:ack`
+
 ## Anti-Patterns
 
 DON'T:
@@ -292,5 +375,7 @@ Extend the Greek alphabet for domain-specific states:
 ```
 zeta    = Needs code review
 eta     = Waiting for external dependency (API, deploy)
-theta   = Testing / running verification
+iota    = Testing / running verification
 ```
+
+Note: `theta` is reserved for protocol feedback (see Protocol Feedback section above).

@@ -7,7 +7,7 @@
 All inter-agent messages MUST use this compressed format.
 
 ### Status Codes
-`alpha`=start `beta`=wip `gamma`=blocked `delta`=done `epsilon`=bug `omega`=shutdown
+`alpha`=start `beta`=wip `gamma`=blocked `delta`=done `epsilon`=bug `omega`=shutdown `theta`=protocol-feedback
 
 ### Actions
 `+`=added `-`=removed `~`=changed `!`=broken `?`=need `->`=depends/becomes
@@ -48,7 +48,7 @@ gammaT4 <<T1 ui-polish waits on VF rewrite
 !!epsilonP0 CR !auth bypass L140
 @bugfix [P0:CR L140, P0:ER L9, P1:CF L26]
 epsilon!retry VF scroll-snap attempt:2/3
-omega -lockCR,ER. DONE.
+omega -lockCR,ER. DONE. theta:1 [missing:delta:partial]
 ```
 
 ### QA Batch Report Format
@@ -100,3 +100,11 @@ T4: UI polish (ui-expert) — <<T1 (waits for scroll rewrite)
 - Use >> to signal dependency resolution when completing tasks
 - Run `tsc --noEmit` after all agents finish to verify no conflicts
 - Use HOOK:verify on TaskCompleted for automated verification
+
+## Protocol Feedback (theta)
+
+Agents can propose protocol improvements based on real experience.
+At `omega`, append observations: `omega DONE. theta:N [category:description, ...]`
+Categories: `shortcode` | `compress` | `pattern` | `bug` | `missing`
+Lead collects, deduplicates, and opens 1 PR via `gh pr create` to the protocol repo.
+See [Protocol Feedback Guide](./docs/protocol-feedback.md) for the full workflow.
