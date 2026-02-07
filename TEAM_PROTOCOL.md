@@ -79,6 +79,21 @@ gammaT4 <<T2                  # task #4 blocked by task #2
 deltaT3 >>T5,T7               # task #3 done, unblocks tasks #5 and #7
 ```
 
+### Consecutive Task Ranges
+
+Use `T#-#` for consecutive task IDs to save tokens:
+
+```
+deltaT1 >>T2-5               # equivalent to >>T2,T3,T4,T5
+gammaT8 <<T3-5               # blocked by tasks 3, 4, and 5
+```
+
+Mix ranges and individual IDs with commas:
+
+```
+deltaT1 >>T2-4,T7,T9         # unblocks T2,T3,T4,T7,T9
+```
+
 ## File Shortcodes
 
 Define per-project. Format: 2-3 uppercase letters.
@@ -198,6 +213,8 @@ epsilon!fail VF scroll-snap attempt:3/3 ?lead   # giving up, needs lead
 deltaT3 >>T5,T7     # "T3 done, unblocks T5 and T7"
 gammaT4 <<T2         # "T4 blocked, waiting on T2"
 deltaT1 >>T2,T3,T4   # "T1 done, unblocks 3 tasks"
+deltaT1 >>T2-4       # same as above, using range notation
+deltaT1 >>T2-4,T7    # range + individual: unblocks T2,T3,T4,T7
 ```
 
 ### Hook Integration
