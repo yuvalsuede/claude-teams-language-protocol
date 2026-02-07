@@ -25,6 +25,30 @@ omega   = Shutting down
 theta   = Protocol improvement proposal
 ```
 
+### Choosing Between gamma and epsilon
+
+`gamma` and `epsilon` can overlap when a bug causes a block. Use this rule:
+
+| Situation | Code | Rationale |
+|-----------|------|-----------|
+| I found a bug (reporting it) | `epsilon` | You are the **reporter** |
+| I can't proceed because of a bug someone else found/owns | `gamma` | You are **blocked**, not reporting |
+| I hit a bug in my own work and am retrying | `epsilon!retry` | You are both reporter and fixer |
+| I hit a bug in my own work and need help | `epsilon!fail ?lead` | You are reporting **and** escalating |
+
+**Rule of thumb**: `epsilon` = "I see a bug." `gamma` = "Something external stops me."
+
+```
+# QA finds auth bug — reporting it
+epsilonP0 CR !auth bypass L140
+
+# UI agent can't polish VF because coder's scroll-snap is broken
+gammaT4 <<T1 VF scroll-snap broken, can't polish
+
+# Bugfix hits a flaky test while fixing — retrying
+epsilon!retry CR auth-test attempt:2/3
+```
+
 ## Actions
 
 ```
